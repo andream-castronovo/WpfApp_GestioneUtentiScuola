@@ -33,5 +33,9 @@ namespace WpfApp_GestioneUtentiScuola.Classi
             return $"Nominativo: {Nominativo}";
         }
 
+        public virtual string OttieniStringaBackup()
+        {
+            return $"Persona#{Nominativo}";
+        }
     }
 }

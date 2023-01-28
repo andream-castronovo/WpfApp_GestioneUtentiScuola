@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using WpfApp_GestioneUtentiScuola.Classi;
 
@@ -32,6 +34,11 @@ namespace WpfApp_GestioneUtentiScuola
             _indicePersone = -1;
             _indiceVoti = -1;
             chkPersona.IsChecked = true;
+
+            AggiornaLabelIndicePersone(lblIndicePersone, _indicePersone);
+            AggiornaLabelIndicePersone(lblIndiceVoti, _indiceVoti);
+
+            //LeggiDaFile();
         }
 
         #region Metodi
@@ -186,6 +193,7 @@ namespace WpfApp_GestioneUtentiScuola
                         null
                         );
                     grpVoti.IsEnabled = true;
+                    DisabilitaControllo(btnModificaVoto);
                 }
                 else if ((bool)chkStudenteFuoriCorso.IsChecked)
                 {
@@ -197,7 +205,7 @@ namespace WpfApp_GestioneUtentiScuola
                         );
                 
                     grpVoti.IsEnabled = true;
-
+                    DisabilitaControllo(btnModificaVoto);
 
                 }
             }
@@ -207,11 +215,14 @@ namespace WpfApp_GestioneUtentiScuola
                 return;
             }
 
-            _persone.Insert(++_indicePersone, p);
+            if (_indicePersone == _persone.Count)
+                _persone.Add(p);
+            else if (_indicePersone >= -1)
+                _persone.Insert(++_indicePersone, p);
 
-            AggiornaLabelIndice(lblIndicePersone, _indicePersone);
+            AggiornaLabelIndicePersone(lblIndicePersone, _indicePersone);
 
-            Messaggio($"Persona numero {_indicePersone+1} aggiunta","Persona aggiunta");
+            Messaggio($"Persona numero {_indicePersone} aggiunta","Persona aggiunta");
         }
 
         private void btnClearList_Click(object sender, RoutedEventArgs e)
@@ -221,8 +232,7 @@ namespace WpfApp_GestioneUtentiScuola
 
         private void btnAggiungiVoto_Click(object sender, RoutedEventArgs e)
         {
-
-
+            Studente s = ((Studente)_persone[_indicePersone]);
             if (txtMateria.Text == "" || txtVoto.Text == "")
             {
                 Messaggio("Il campo \"Materia\" o il campo \"Voto\" è vuoto.", "Errore", true);
@@ -231,20 +241,26 @@ namespace WpfApp_GestioneUtentiScuola
 
             try
             {
-                ((Studente)_persone[_indicePersone]).AggiungeValutazione(new Valutazione(txtMateria.Text, double.Parse(txtVoto.Text)));
+                s.AggiungeValutazione(new Valutazione(txtMateria.Text, double.Parse(txtVoto.Text)));
             }
             catch (Exception ex)
             {
                 Messaggio(ex.Message, "Errore", true);
                 return;
             }
-
+            
+            _indiceVoti = s.NumeroValutazioni - 1;
+            AggiornaLabelIndiceVoti(lblIndiceVoti, _indiceVoti);
+            Messaggio("Valutazione aggiunta con successo!", "Valutazione aggiunta");
         }
 
         private void btnChangePersona_Click(object sender, RoutedEventArgs e)
         {
-            if (_indicePersone == -1)
+            if (_persone.Count == 0)
+            {
+                Messaggio("Nessuna persona trovata.","No persone");
                 return;
+            }
 
             switch (((Button)sender).Name)
             {
@@ -252,32 +268,34 @@ namespace WpfApp_GestioneUtentiScuola
                     _indicePersone = 0;
                     break;
                 case "btnPersonaPrecedente":
-                    if (_indicePersone != 0)
+                    if (_indicePersone >= 0)
                         _indicePersone--;
                     break;
                 case "btnPersonaSuccessiva":
-                    if (_indicePersone != _persone.Count - 1)
+                    if (_indicePersone < _persone.Count)
                         _indicePersone++;
-                    else
-                    {
-                        PulisciTextBox();
-                        return;
-                    }
                     break;
                 case "btnUltimaPersona":
                     _indicePersone = _persone.Count - 1;
                     break;
             }
 
+            
+            AggiornaLabelIndicePersone(lblIndicePersone, _indicePersone);
 
-            AggiornaLabelIndice(lblIndicePersone, _indicePersone);
+            if (_indicePersone == _persone.Count || _indicePersone == -1)
+            {
+                PulisciTextBox();
+                DisabilitaControllo(grpVoti);
+                DisabilitaControllo(btnModifica);
+                return;
+            }
 
+            AbilitaControllo(btnModifica);
             CaricaPersonaAIndice(_indicePersone);
         }
-
-
         #endregion
-
+        
         #region Checked e Unchecked
         private void SceltaRuolo_Checked(object sender, RoutedEventArgs e)
         {
@@ -299,9 +317,14 @@ namespace WpfApp_GestioneUtentiScuola
 
         }
 
-        void PulisciTextBox()
+        void PulisciTextBox(bool voti = false)
         {
-            TextBox[] txts = { txtLaurea, txtMatricola, txtAnniFuoriCorso, txtNominativo };
+            TextBox[] txts = null;
+            
+            if (!voti)
+                txts = new TextBox[] { txtLaurea, txtMatricola, txtAnniFuoriCorso, txtNominativo };
+            else
+                txts = new TextBox[] { txtVoto, txtMateria };
 
             foreach (TextBox t in txts)
                 t.Text = "";
@@ -311,22 +334,35 @@ namespace WpfApp_GestioneUtentiScuola
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
             PulisciTextBox();
-            _indicePersone = _persone.Count - 1;
-            AggiornaLabelIndice(lblIndicePersone, _indicePersone);
+            AggiornaLabelIndicePersone(lblIndicePersone, _indicePersone);
         }
 
-        void AggiornaLabelIndice(Label lbl, int i)
+        void AggiornaLabelIndicePersone(Label lbl, int i)
         {
             string s = "";
             
-            if (i >= 0)
+            if (i >= 0 && i != _persone.Count)
                 s = $"Indice: {i}";
             else if (i < 0)
-                s = $"Indice: No";
+                s = $"Indice: -1\n(Nessuna persona selezionata)";
+            else if (i == _persone.Count)
+                s = $"Indice: {i}\n(Indice ancora non esistente)";
+            
+            lbl.Content = s;
+        }
+        void AggiornaLabelIndiceVoti(Label lbl, int i)
+        {
+            string s = "";
+
+            if (i >= 0 && i != ((Studente)_persone[_indicePersone]).NumeroValutazioni)
+                s = $"Indice: {i}";
+            else if (i < 0)
+                s = $"Indice: -1\n(Nessuna valutazione selezionata)";
+            else if (i == ((Studente)_persone[_indicePersone]).NumeroValutazioni)
+                s = $"Indice: {i}\n(Indice ancora non esistente)";
 
             lbl.Content = s;
         }
-
 
         private void SceltaRuolo_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -347,22 +383,26 @@ namespace WpfApp_GestioneUtentiScuola
                     break;
             }
         }
-
+        
         #endregion
 
         #endregion
-
+        
         private void CaricaPersonaAIndice(int i)
         {
+            if (i < 0 || i >= _persone.Count)
+                return;
+
             Persona p = _persone[i];
 
             txtNominativo.Text = p.Nominativo;
+            chkPersona.IsChecked = true;
 
             if (p is Studente)
             {
                 chkStudente.IsChecked = true;
                 txtMatricola.Text = ((Studente)p).Matricola + "";
-
+                _indiceVoti = 0;
 
                 grpVoti.IsEnabled = true;
             }
@@ -418,8 +458,14 @@ namespace WpfApp_GestioneUtentiScuola
         private void ChangeVoto_Click(object sender, RoutedEventArgs e)
         {
             // Qui sicuramente abbiamo uno studente
-
+            
             Studente s = (Studente)_persone[_indicePersone];
+
+            if (s.NumeroValutazioni == 0)
+            {
+                Messaggio("Nessuna valutazione trovata.", "No valutazioni");
+                return;
+            }
 
             switch (((Button)sender).Name)
             {
@@ -427,30 +473,123 @@ namespace WpfApp_GestioneUtentiScuola
                     _indiceVoti = 0;
                     break;
                 case "btnVotoPrecedente":
-                    if (_indiceVoti != 0)
+                    if (_indiceVoti >= 0)
                         _indiceVoti--;
                     break;
                 case "btnVotoSuccessivo":
-                    if (_indiceVoti != s.NumeroValutazioni - 1)
+                    if (_indiceVoti < s.NumeroValutazioni)
                         _indiceVoti++;
-                    else
-                    {
-                        txtVoto.Text = "";
-                        txtMateria.Text = "";
-                        return;
-                    }
                     break;
                 case "btnUltimoVoto":
                     _indiceVoti = s.NumeroValutazioni - 1;
                     break;
             }
 
-            AggiornaLabelIndice(lblIndiceVoti, _indiceVoti);
+            AggiornaLabelIndiceVoti(lblIndiceVoti, _indiceVoti);
+            
+            if (_indiceVoti >= s.NumeroValutazioni || _indiceVoti < 0)
+            {
+                PulisciTextBox(voti: true);
+                DisabilitaControllo(btnModificaVoto);
+                return;
+            }
+
+            AbilitaControllo(btnModificaVoto);
 
             txtVoto.Text = s[_indiceVoti].Voto + "";
             txtMateria.Text = s[_indiceVoti].Materia + "";
+        }
 
+        private void btnModificaVoto_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ((Studente)_persone[_indicePersone])[_indiceVoti].Materia = txtMateria.Text;
+                ((Studente)_persone[_indicePersone])[_indiceVoti].Voto = double.Parse(txtVoto.Text);
+                Messaggio("Valutazione modificata con successo!", "Modifica valutazione");
+            }
+            catch (Exception ex)
+            {
+                Messaggio(ex.Message, "Errore", true);
+            }
+        }
+        
+        private void btnSaveAll_Click(object sender, RoutedEventArgs e)
+        {
+            SalvataggioSuFile();
+            Messaggio("Salvato", "Sheesh");
+        }
+
+        private void SalvataggioSuFile()
+        {
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                Messaggio(ex.Message, "Errore", true);
+            }
+
+            //StreamWriter sw = new StreamWriter("../../Salvataggio.txt");
+
+            //foreach (Persona p in _persone)
+            //{
+            //    sw.WriteLine(p.OttieniStringaBackup());    
+            //}
+
+            //sw.Close();
+        }
+
+        private void LeggiDaFile()
+        {
+
+            try
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                Messaggio(ex.Message, "Errore", true);
+                return;
+            }
+
+            StreamReader sr = new StreamReader("../../Salvataggio.txt");
+
+            List<string> rows = new List<string>();
+
+            while (!sr.EndOfStream)
+            {
+                rows.Add(sr.ReadLine());
+            }
+
+            sr.Close();
+            
+            foreach (string row in rows)
+            {
+                string[] dati = row.Split('#');
+
+                Persona p = null;
+                switch (dati[0])
+                {
+                    case "Persona":
+                        p = new Persona(dati[1]);
+                        break;
+                    case "Docente":
+                        p = new Docente(dati[1], dati[2]);
+                        break;
+                    case "Studente":
+                        break;
+                    case "StudenteFuoriCorso":
+                        break;
+                }
+
+                Console.Write(p);
+
+            }
 
         }
+    
+    
     }
 }

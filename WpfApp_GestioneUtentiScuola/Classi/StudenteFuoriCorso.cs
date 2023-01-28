@@ -17,5 +17,10 @@
         {
             return base.ToString() + $", Anni fuori corso: {AnniFuoriCorso}" ;
         }
+
+        public override string OttieniStringaBackup()
+        {
+            return base.OttieniStringaBackup().Replace("Studente", "StudenteFuoriCorso") + $"#{AnniFuoriCorso}";
+        }
     }
 }

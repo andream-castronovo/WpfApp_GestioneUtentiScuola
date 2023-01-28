@@ -88,5 +88,18 @@ namespace WpfApp_GestioneUtentiScuola.Classi
             // TODO: Altro??? ☺
         }
 
+
+        public override string OttieniStringaBackup()
+        {
+            string s = $"Studente#{Nominativo}#{Matricola}#";
+
+            foreach (Valutazione v in _valutazioni)
+            {
+                s += $"{v.Materia},{v.Voto};";
+            }
+
+            return s;
+        }
+
     }
 }

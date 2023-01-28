@@ -23,6 +23,5 @@
             return $"Materia: {Materia}, Voto: {Voto}";
         }
 
-
     }
 }

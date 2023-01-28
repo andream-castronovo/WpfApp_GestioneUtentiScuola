@@ -32,5 +32,10 @@ namespace WpfApp_GestioneUtentiScuola.Classi
         {
             return base.ToString() + $", Laureato in: {Laurea}";
         }
+
+        public override string OttieniStringaBackup()
+        {
+            return $"Docente#{Nominativo}#{Laurea}";
+        }
     }
 }
