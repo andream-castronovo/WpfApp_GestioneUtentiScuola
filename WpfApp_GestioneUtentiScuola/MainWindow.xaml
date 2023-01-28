@@ -30,10 +30,10 @@
 
 
                 <StackPanel Grid.Row="0" Grid.ColumnSpan="8" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <RadioButton x:Name="chkPersona" Content="Persona" Margin="0,0,10,0" IsChecked="True" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked"/>
-                    <RadioButton x:Name="chkDocente" Content="Docente" Margin="0,0,10,0" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked"/>
-                    <RadioButton x:Name="chkStudente" Content="Studente" Margin="0,0,10,0" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked"/>
-                    <RadioButton x:Name="chkStudenteFuoriCorso" Content="Studente fuori corso" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked"/>
+                    <RadioButton x:Name="chkPersona" Content="Persona" Margin="0,0,10,0" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked" Click="CheckBox_Click"/>
+                    <RadioButton x:Name="chkDocente" Content="Docente" Margin="0,0,10,0" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked" Click="CheckBox_Click"/>
+                    <RadioButton x:Name="chkStudente" Content="Studente" Margin="0,0,10,0" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked" Click="CheckBox_Click"/>
+                    <RadioButton x:Name="chkStudenteFuoriCorso" Content="Studente fuori corso" Checked="SceltaRuolo_Checked" Unchecked="SceltaRuolo_Unchecked" Click="CheckBox_Click"/>
                 </StackPanel>
 
                 <Grid Grid.Row="1" VerticalAlignment="Center">
@@ -78,12 +78,12 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="|&lt;&lt;" Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&lt;&lt;"  Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&gt;&gt;"  Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&gt;&gt;|" Margin="10,0,0,0" Width="30"/>
+                            <Button x:Name="btnPrimaPersona" Content="|&lt;&lt;" Margin="10,0,0,0" Width="30" Click="btnChangePersona_Click"  />
+                            <Button x:Name="btnPersonaPrecedente" Content="&lt;&lt;"  Margin="10,0,0,0" Width="30" Click="btnChangePersona_Click"  />
+                            <Button x:Name="btnPersonaSuccessiva" Content="&gt;&gt;"  Margin="10,0,0,0" Width="30" Click="btnChangePersona_Click"  />
+                            <Button x:Name="btnUltimaPersona" Content="&gt;&gt;|" Margin="10,0,0,0" Width="30" Click="btnChangePersona_Click"  />
                         </StackPanel>
-                        <Label Name="lblIndicePersone" Content="Indice: 0" Grid.Column="3"/>
+                        <Label Name="lblIndicePersone" Content="Indice: No" Grid.Column="3"/>
                     </Grid>
 
                 </Grid>
@@ -94,8 +94,8 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Content="Modifica" Name="btnModifica" Margin="55,25,55,25" Grid.Column="0"/>
-                    <Button Content="Nuovo" Name="btnNuovo" Margin="55,25,55,25" Grid.Column="1" Click="btnNuovo_Click"/>
+                    <Button Content="Modifica" Name="btnModifica" Margin="55,25,55,25" Grid.Column="0" Click="btnModifica_Click"/>
+                    <Button Content="Nuovo" Name="btnNuovaPersona" Margin="55,25,55,25" Grid.Column="1" Click="btnNuovaPersona_Click"/>
                 </Grid>
 
                 <GroupBox x:Name="grpVoti" Header="Voti" Grid.RowSpan="2" Grid.Row="4" Margin="10">
@@ -122,18 +122,18 @@
                         <TextBox Grid.Column="4" Name="txtVoto"/>
                         
                         <!--Seconda riga-->
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="3">
-                            <Button Content="|&lt;&lt;" Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&lt;&lt;"  Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&gt;&gt;"  Margin="10,0,0,0" Width="30"/>
-                            <Button Content="&gt;&gt;|" Margin="10,0,0,0" Width="30"/>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Grid.Row="1" Grid.ColumnSpan="3" >
+                            <Button x:Name="btnPrimoVoto"  Content="|&lt;&lt;" Margin="10,0,0,0" Width="30" Click="ChangeVoto_Click"/>
+                            <Button x:Name="btnVotoPrecedente" Content="&lt;&lt;"  Margin="10,0,0,0" Width="30" Click="ChangeVoto_Click"/>
+                            <Button x:Name="btnVotoSuccessivo" Content="&gt;&gt;"  Margin="10,0,0,0" Width="30" Click="ChangeVoto_Click"/>
+                            <Button x:Name="btnUltimoVoto" Content="&gt;&gt;|" Margin="10,0,0,0" Width="30" Click="ChangeVoto_Click"/>
                         </StackPanel>
 
-                        <Label Name="lblIndiceVoti" Content="Indice: 0" Grid.Row="1" Grid.Column="3"/>
+                        <Label Name="lblIndiceVoti" Content="Indice: No" Grid.Row="1" Grid.Column="3"/>
                         
                         <!--Terza riga-->
                         <Button Name="btnSalvaVoto" Content="Salva" Grid.Row="2" Grid.ColumnSpan="2" Margin="30,5,30,5"/>
-                        <Button Name="btnAggiungiVoto" Content="Aggiungi" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="3" Margin="30,5,30,5"/>
+                        <Button Name="btnAggiungiVoto" Click="btnAggiungiVoto_Click" Content="Aggiungi" Grid.Row="2" Grid.ColumnSpan="2" Grid.Column="3" Margin="30,5,30,5"/>
                     
                         
                         
@@ -154,7 +154,7 @@
                 </Grid.RowDefinitions>
 
                 <Button x:Name="btnMostraTutto" Content="Mostra tutto" Margin="30,20,30,20" Click="btnMostraTutto_Click"/>
-                <Button x:Name="btnStatisticheComplessive" Content="Statistiche complessive" Grid.Column="2" Margin="30,20,30,20"/>
+                <Button x:Name="btnStatisticheComplessive" Content="Statistiche complessive" Grid.Column="2" Margin="30,20,30,20" Click="btnStatisticheComplessive_Click"/>
                 
                 <ListBox x:Name="lstOutput" Grid.Row="1" Grid.ColumnSpan="2" Margin="23"/>
 
